@@ -9,6 +9,6 @@ How to run on single chain:
 
 Run on all chains with runner:
 
-  **Set your absolute path to jchainz directory. If you have jchainz under /home no changes need to be made meaning**
+  **Set your absolute path to jchainz directory. If you have jchainz under /home no changes need to be made**
 
 `$ nohup bash -c 'time /home/jchainz/ChainzAnalyzer/runner.py /home/jchainz/ChainzFinder/output/chains/' > /home/ChainzAnalyzerOutput_DATE.txt &`
