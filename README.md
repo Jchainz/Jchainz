@@ -7,4 +7,4 @@ Contents of folder
 - stacktraces: stacktraces of ysoserial chains
 - tools: various tools
 
-Please refer to specific folder for more information
+**Please refer to specific folder for more information**
