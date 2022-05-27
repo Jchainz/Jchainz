@@ -8,6 +8,8 @@ import soot.options.Options;
 import java.time.LocalDateTime;
 import java.util.*;
 
+// This main is started by ChainzFinderRunner, it analyzes and finds the chains for the targetJarPath specified,
+// the process output is written in entryPointSTDOUTFile (output/JAR/class/method.stout)
 public class ChainzManager {
     public static Boolean DEBUG = true;
 
@@ -52,6 +54,7 @@ public class ChainzManager {
         timeout = Integer.parseInt(argv[6]);
         timestart = getCurrentTimestamp();
 
+        // sets the arguments used by Soot.
         ArrayList<String> tmpSootArgs = new ArrayList<String>(Arrays.asList(new String[]{
                 "-w",
                 "-include-all",
@@ -64,12 +67,16 @@ public class ChainzManager {
 
         targetJarPath = argv[0];
         if(!targetJarPath.equals("")) {
+            // this adds to the classpath the specific jar that has to be analyzed.
             classpath += ":" + targetJarPath;
+            // adds to the Soot arguments the jar to analyze.
             tmpSootArgs.add("-process-dir");
             tmpSootArgs.add(targetJarPath);
         }
 
         if (DEBUG) {
+            // prints all the jar in the classpath: the first two are used to call the libraries in rt.jar and
+            // jce.jar, the last one contains the jar to analyze.
             System.out.println("\n[i] CLASSPATH: ");
             for (String s : classpath.split(":")) {
                 System.out.println("\t- " + s);
@@ -77,6 +84,7 @@ public class ChainzManager {
             System.out.flush();
         }
 
+        // Sets the Soot classpath
         Options.v().set_soot_classpath(classpath);
         /*=========================*/
 
@@ -91,9 +99,9 @@ public class ChainzManager {
         /* SETTING ENTRY AND EXIT POINTS */
         try {
 
-            String entryExitPointsString = argv[1];;
-            int entryExitMaxDepth = Integer.valueOf(argv[2]);
-            Boolean applyClassFilter = Boolean.valueOf(argv[3]);
+            String entryExitPointsString = argv[1];                 // <EntryPointMethod>:<ExitPointMethod>
+            int entryExitMaxDepth = Integer.valueOf(argv[2]);       // <MaxChainDepth>
+            Boolean applyClassFilter = Boolean.valueOf(argv[3]);    // <ApplyClassFilter true/false>
 
             if (DEBUG) {
                 System.out.println("\n[i] ADDED TRANSFORMATION\n\t- " + entryExitPointsString);
@@ -102,7 +110,10 @@ public class ChainzManager {
                 System.out.flush();
             }
 
+            // It makes a ChainzExplorer object to explore methods chains in the target jar,
+            // the entry point is the method specified as such in the input parameters and exit point the desired one.
             ChainzExplorer ce = new ChainzExplorer(targetJarPath, entryExitPointsString, entryExitMaxDepth, applyClassFilter, maxChainz, timeout);
+            // It gets the chains found.
             ce.getChainz();
 
             CGCreationStart = System.currentTimeMillis();
