@@ -48,6 +48,7 @@ public class ChainzExplorer {
 
     public ChainzExplorer(String targetJarPath, String entryexitcouple, int maxchaindepth, Boolean classFilterFlag, int maxChainz, int timeout) {
         int l = targetJarPath.split("/").length;
+        // Saves the jar name, that is the jar last part
         targetJarName = targetJarPath.equals("") ? "openJDK/" : targetJarPath.split("/")[l - 1] + "/";
         entryExitCouple = entryexitcouple;
         maxChainDepth = maxchaindepth;
@@ -69,21 +70,29 @@ public class ChainzExplorer {
         entryPointClassName = tmp[tmp.length - 2];
         entryPointMethodName = tmp[tmp.length - 1];
 
+        // saves in the variable the exit point package (package is exitPoint - class - method)
         tmp = exitPoint.split("\\.");
         exitPointPackageName = "";
         for (int i = 0; i < tmp.length - 2; i++) {
             exitPointPackageName += i == 0 ? tmp[i] : "." + tmp[i];
         }
+        // Saves the exit point class (penultimate element of the exitpoint string)
         exitPointClassName = tmp[tmp.length - 2];
         ;
+        // Saves the exit point method (last element of the exitpoint string)
         exitPointMethodName = tmp[tmp.length - 1];
         /*=============================*/
 
         /* SETTING CHAINZ OUTPUT FILE */
         try {
+            // It creates a file where all the chains found will be written, the file is created at the following path:
+            // /jchainz/ChainzFinder/output/chains/JARNAME.jar
+            // Name of example file: AbstractSerializableCollectionDecorator.readObject.10.chains
             file = new File(PROJECT_HOME + chainsDirectoryPath + targetJarName + entryPointClassName + "." + entryPointMethodName + "." + maxChainDepth + "." + "chains");
             file.getParentFile().mkdirs();
             bw = new BufferedWriter(new FileWriter(file, true));
+            // Writes inside the file the first row containing the target jar from the analysis
+            // (example: commons-collections-3.1.jar/)
             bw.append(this.targetJarName + "\n");
         } catch (IOException e) {
             e.printStackTrace();
@@ -137,6 +146,7 @@ public class ChainzExplorer {
 
     private void visit(int currentChainDepth, String currentMethodPath, String currentMethodPathOut, SootMethod edgeSourceMethod) {
 
+        // If the exit point is reached the execution is terminated and returns from this method.
         if (currentMethodPath.endsWith(exitPointClassName + "." + exitPointMethodName)) {
             return;
         }
@@ -148,6 +158,7 @@ public class ChainzExplorer {
 
         while (edgeIterator.hasNext()) {
 
+            // Checks if the execution timeout has been reached, if so it terminates the execution.
             if (!canContinueTimeout())
                 System.exit(123);
 
@@ -156,9 +167,15 @@ public class ChainzExplorer {
 
             if (applyClassFilter) {
                 Type serializableType = Scene.v().getType("java.io.Serializable");
+                // Checks if the class of the method found (the next one in the call graph) is serializable
                 boolean targetImplementsSerializable = Scene.v().getFastHierarchy().canStoreType(edgeTargetMethod.getDeclaringClass().getType(), serializableType);
+                // Checks if the class of the edge method found is superclass of the source method.
                 boolean targetIsSuperclassOfSource = Scene.v().getFastHierarchy().canStoreType(edgeSourceMethod.getDeclaringClass().getType(), edgeTargetMethod.getDeclaringClass().getType());
+                // Checks if the target edge method found is the same exit point defined as input parameter.
                 boolean targetIsExitPoint = exitPointMethodName.equals(edgeTargetMethod.getName());
+                // If the method is not the exit point and the target method class is not serializable and it's not
+                // a superclass of the source method then stops this iteration and finds the next edge
+                // (in the next while iteration)
                 if (!targetIsExitPoint && !targetImplementsSerializable && !targetIsSuperclassOfSource) {
                     //System.out.println("NO ARC " + edgeSourceMethod.getDeclaringClass().getType() +" - "+ edgeTargetMethod.getDeclaringClass().getType());
                     continue;
@@ -172,13 +189,19 @@ public class ChainzExplorer {
             ) {
 
                 //currentNewChain = currentMethodPath + " ==> " + methodToString(edgeTargetMethod) + edgeTargetMethod.getParameterTypes();
+                // It saves in the variables the links between class.method currently analyzed and the class.method target (called)
                 currentNewChain = currentMethodPath + " ==> " + methodToString(edgeTargetMethod);
                 currentNewChainOut = currentMethodPathOut + " ==> " + methodToStringOut(edgeTargetMethod);
 
 
+                // If this variable with the link class.method ==> targetclass.targetmethod contains the exit point
+                // (probably in the target) and if the chains found until now does not contains exactly this new chain
+                // (redundancy) so the program executes this if code block where this new chain will be added to the
+                // ones already found.
                 if (currentNewChain.contains(exitPointClassName + "." + exitPointMethodName) && !chainzStrings.contains(currentNewChain)) {
 
 
+                    // If the maximum depth is reached then the execution is terminated, else the remaining depth is decreased.
                     if (maxChainz <= 0) {
                         System.exit(123);
                     } else {
@@ -186,6 +209,7 @@ public class ChainzExplorer {
                         //System.out.println(maxChainz + " Stop");
                         maxChainz--;
                     }
+                    // Prints the chain just found on entrypoints_stdout/JAR/CLASS/METHOD.stdout file.
                     if (DEBUG) {
                         System.out.println("\t- " + currentNewChainOut);
                         System.out.flush();
@@ -194,16 +218,23 @@ public class ChainzExplorer {
                     try {
 
                         //System.out.println("\nMAX CHAINZ - > "+maxChainz);
+                        // Adds the chain just found to the file containing all the chains for
+                        // the current JAR/class/method: JAR/CLASS.METHOD.maxDepth.chains
+                        // This is the entire chain. That's because if the execution has not terminated yet and it has
+                        // reached this point, it means that the exit point has been found.
                         bw.append(currentNewChainOut + "\n");
                         bw.flush();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
 
+                    // It adds the string just found to the chains found until now
                     chainzStrings.add(currentNewChain);
 
                 }
 
+                // The method calls itself recursively incrementing the depth by one, and using as new parameters
+                // the chains and methods just found.
                 visit(currentChainDepth + 1, currentNewChain, currentNewChainOut, edgeTargetMethod);
             }
 
@@ -228,6 +259,10 @@ public class ChainzExplorer {
 
                                 CHATransformer.v().transform();
 
+                                // Reminder: all the printlns print at the following path:
+                                // ChainzFinder/out/artifacts/ChainzFinderRunner/entrypoints_stdout/JAR/CLASS/METHOD.stdout
+                                // Example path:
+                                // ChainzFinder/out/artifacts/ChainzFinderRunner/entrypoints_stdout/commons-collections-3.1.jar/DualHashBidiMap/readObject.stdout
                                 if (DEBUG) {
                                     System.out.println("\n************************ STARTED ************************");
                                     System.out.flush();
@@ -255,6 +290,7 @@ public class ChainzExplorer {
                                     System.out.flush();
                                 }
 
+                                // Saves the class and the entry point method in the Soot objects.
                                 SootClass entryPointClass = Scene.v().getSootClass(entryPointPackageName + "." + entryPointClassName);
                                 SootMethod entryPointMethod = entryPointClass.getMethodByName(entryPointMethodName);
 
@@ -272,6 +308,8 @@ public class ChainzExplorer {
                                     start = System.currentTimeMillis();
                                     if (timestart == null)
                                         timestart = getCurrentTimestamp();
+                                    // Calls the visit method so that all the chain is visited until the max depth
+                                    // is reached, starting from the entry point.
                                     visit(0, methodToString(entryPointMethod), methodToStringOut(entryPointMethod), entryPointMethod);
                                     end = System.currentTimeMillis();
 
@@ -294,12 +332,16 @@ public class ChainzExplorer {
                 )
         );
 
+        // It loads the entry point class in a SootClass object and loads all the necessary classes linked to that one.
         SootClass c = Scene.v().forceResolve(entryPointPackageName + "." + entryPointClassName, SootClass.BODIES);
         c.setApplicationClass();
         Scene.v().loadNecessaryClasses();
+        // Loads the entry poiny method of the above class in a SootMethod object
         SootMethod method = c.getMethodByName(entryPointMethodName);
         List entryPoints = new ArrayList();
+        // Adds this entry poiny method to a list that at the moment contains only this element.
         entryPoints.add(method);
+        // Sets the Scene entryPoints as the list just created.
         Scene.v().setEntryPoints(entryPoints);
 
     }
