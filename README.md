@@ -1,4 +1,4 @@
-# JChazin
+# JChainz
 
 Contents of folder
 - ChainzFinder
