@@ -1,0 +1,1 @@
+time java -jar ../ChainzFinder/target/ChainzFinder-1.0-SNAPSHOT-jar-with-dependencies.jar ../ChainzFinder/target/target_jars/commons-collections4-4.0.jar org.apache.commons.collections4.bag.HashBag.readObject:java.lang.reflect.Method.invoke  7 false ../ 20 300 -cp /usr/lib/jvm/java-8-openjdk-amd64 > ../results
