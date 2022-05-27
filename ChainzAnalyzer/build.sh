@@ -13,6 +13,6 @@ successorColor=#ff0000
 
 # Common properties
 JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-PROJECT_HOME=/home/andromeda/jchainz
+PROJECT_HOME= Add you path to jchainz directory es. /home/directory
 
 targetJarPath=" > config.properties
