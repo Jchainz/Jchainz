@@ -226,6 +226,8 @@ public class ChainzExplorer {
                 }
                 if(currentChainDepth == 7) System.out.println("STEP7 DONE" + ". CurrentChainDepth: " + currentChainDepth + "  EdgeSourceMethod: " + edgeSourceMethod + "  EdgeTargetMethod: " + edgeTargetMethod);
 */
+
+                /*
                 // Added controls to check the Hashtable CommonsCollections8 chain
                 SootClass step1Class = Scene.v().getSootClass("org.apache.commons.collections4.bag.AbstractMapBag");
                 SootMethod step1Method = step1Class.getMethodByName("doReadObject");
@@ -270,6 +272,58 @@ public class ChainzExplorer {
                 }
                 if(currentChainDepth == 7) System.out.println("STEP7 DONE" + ". CurrentChainDepth: " + currentChainDepth + "  EdgeSourceMethod: " + edgeSourceMethod + "  EdgeTargetMethod: " + edgeTargetMethod);
                 */
+
+
+                // Added controls to check the Hashtable CommonsCollections10 chain
+                SootClass step1Class = Scene.v().getSootClass("org.apache.commons.collections4.map.LRUMap");
+                SootMethod step1Method = step1Class.getMethodByName("doReadObject");
+                if(currentChainDepth == 1 && !edgeSourceMethod.equals(step1Method)) { // edgeTargetMethod
+                    continue;
+                }
+                if(currentChainDepth == 1) System.out.println("STEP1 DONE" + ". CurrentChainDepth: " + currentChainDepth + "  EdgeSourceMethod: " + edgeSourceMethod + "  EdgeTargetMethod: " + edgeTargetMethod);
+                SootClass step2Class = Scene.v().getSootClass("org.apache.commons.collections4.map.AbstractHashedMap");
+                SootMethod step2Method = step2Class.getMethodByName("doReadObject");
+                if(currentChainDepth == 2 && !edgeSourceMethod.equals(step2Method)) {
+                    continue;
+                }
+                if(currentChainDepth == 2) System.out.println("STEP2 DONE" + ". CurrentChainDepth: " + currentChainDepth + "  EdgeSourceMethod: " + edgeSourceMethod + "  EdgeTargetMethod: " + edgeTargetMethod);
+                SootClass step3Class = Scene.v().getSootClass("org.apache.commons.collections4.map.AbstractHashedMap");
+                SootMethod step3Method = step3Class.getMethodByName("put");
+                if(currentChainDepth == 3 && !edgeSourceMethod.equals(step3Method)) {
+                    continue;
+                }
+                if(currentChainDepth == 3) System.out.println("STEP3 DONE" + ". CurrentChainDepth: " + currentChainDepth + "  EdgeSourceMethod: " + edgeSourceMethod + "  EdgeTargetMethod: " + edgeTargetMethod);
+                SootClass step4Class = Scene.v().getSootClass("org.apache.commons.collections4.map.AbstractHashedMap");
+                SootMethod step4Method = step4Class.getMethodByName("isEqualKey");
+                if(currentChainDepth == 4 && !edgeSourceMethod.equals(step4Method)) {
+                    continue;
+                }
+                if(currentChainDepth == 4) System.out.println("STEP4 DONE" + ". CurrentChainDepth: " + currentChainDepth + "  EdgeSourceMethod: " + edgeSourceMethod + "  EdgeTargetMethod: " + edgeTargetMethod);
+                SootClass step5Class = Scene.v().getSootClass("java.util.Hashtable");
+                SootMethod step5Method = step5Class.getMethodByName("equals");
+                if(currentChainDepth == 5 && !edgeSourceMethod.equals(step5Method)) {
+                    continue;
+                }
+                if(currentChainDepth == 5) System.out.println("STEP5 DONE" + ". CurrentChainDepth: " + currentChainDepth + "  EdgeSourceMethod: " + edgeSourceMethod + "  EdgeTargetMethod: " + edgeTargetMethod);
+                SootClass step6Class = Scene.v().getSootClass("org.apache.commons.collections4.map.DefaultedMap");
+                SootMethod step6Method = step6Class.getMethodByName("get");
+                if(currentChainDepth == 6 && !edgeSourceMethod.equals(step6Method)) {
+                    continue;
+                }
+                if(currentChainDepth == 6) System.out.println("STEP6 DONE" + ". CurrentChainDepth: " + currentChainDepth + "  EdgeSourceMethod: " + edgeSourceMethod + "  EdgeTargetMethod: " + edgeTargetMethod);
+                SootClass step7Class = Scene.v().getSootClass("org.apache.commons.collections4.functors.InvokerTransformer");
+                SootMethod step7Method = step7Class.getMethodByName("transform");
+                if(currentChainDepth == 7 && !edgeSourceMethod.equals(step7Method)) {
+                    continue;
+                }
+                if(currentChainDepth == 7) System.out.println("STEP7 DONE" + ". CurrentChainDepth: " + currentChainDepth + "  EdgeSourceMethod: " + edgeSourceMethod + "  EdgeTargetMethod: " + edgeTargetMethod);
+                SootClass step8Class = Scene.v().getSootClass("java.lang.reflect.Method");
+                SootMethod step8Method = step8Class.getMethodByName("invoke");
+                if(currentChainDepth == 7 && !edgeTargetMethod.equals(step8Method)) {
+                    continue;
+                }
+                if(currentChainDepth == 7 && edgeTargetMethod.equals(step8Method)) System.out.println("STEP8 DONE" + ". CurrentChainDepth: " + currentChainDepth + "  EdgeSourceMethod: " + edgeSourceMethod + "  EdgeTargetMethod: " + edgeTargetMethod);
+
             }
 
             if (
