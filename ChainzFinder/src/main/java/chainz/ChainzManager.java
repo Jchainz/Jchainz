@@ -16,7 +16,7 @@ public class ChainzManager {
     public static String PROJECT_HOME = "";
     public static String SYSTEM_USER = System.getenv("USER");
 
-    public static String JAVA_HOME = System.getenv("JAVA_HOME");
+    public static String JAVA_HOME = "/usr/lib/jvm/java-8-openjdk-amd64"; // System.getenv("JAVA_HOME");
 
     public static String classpath;
 
